@@ -15,7 +15,7 @@ def get_catalog_quest() -> None:
 
         get_category_menu()
 
-        category_choice: str = input("Ваш выбор: ")
+        category_choice: str = input("Ваш выбор: ").lower()
 
         if category_choice.isdigit():
             category_index: int = int(category_choice) - 1

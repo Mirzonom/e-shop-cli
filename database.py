@@ -1,5 +1,17 @@
 import sqlite3
+from enum import Enum
 from typing import Optional, Tuple, List, Any
+
+
+class TransactionType(Enum):
+    Withdrawal = 0
+    Deposit = 1
+
+
+class SqlQueryReturnType(Enum):
+    FETCHALL = 'fetchall'
+    FETCHONE = 'fetchone'
+    LASTROWID = 'lastrowid'
 
 
 class UserRepository:
@@ -30,9 +42,9 @@ class UserRepository:
                                  (user_id,), return_type='fetchall')
         total_balance = 1000.0  # начальный баланс
         for amount, transaction_type in transactions:
-            if transaction_type == 0:  # списание
+            if transaction_type == TransactionType.Withdrawal:  # списание
                 total_balance -= amount
-            elif transaction_type == 1:  # зачисление
+            elif transaction_type == TransactionType.Deposit:  # зачисление
                 total_balance += amount
         return total_balance
 
@@ -161,9 +173,9 @@ class ProductRepository:
                                  (product_id,), return_type='fetchall')
         total_quantity = self.find_by_id(product_id)[4]  # исходный stock из таблицы products
         for quantity, transaction_type in transactions:
-            if transaction_type == 0:  # списание
+            if transaction_type == TransactionType.Withdrawal:  # списание
                 total_quantity -= quantity
-            elif transaction_type == 1:  # зачисление
+            elif transaction_type == TransactionType.Deposit:  # зачисление
                 total_quantity += quantity
         return total_quantity
 
@@ -295,13 +307,13 @@ def close_database(conn) -> None:
     conn.close()
 
 
-def sql_query(conn, query: str, params: tuple = (), return_type: str = 'lastrowid') -> Any:
+def sql_query(conn, query: str, params: tuple = (), return_type: str = SqlQueryReturnType.LASTROWID) -> Any:
     with conn:
         cursor = conn.cursor()
         cursor.execute(query, params)
 
-        if return_type == 'fetchall':
+        if return_type == SqlQueryReturnType.FETCHALL:
             return cursor.fetchall()
-        elif return_type == 'fetchone':
+        elif return_type == SqlQueryReturnType.FETCHONE:
             return cursor.fetchone()
         return cursor.lastrowid
